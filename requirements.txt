@@ -1,0 +1,9 @@
+# Arquivo requirements.txt
+
+# Dependências principais
+flask==2.0.1
+requests==2.25.1
+
+# Dependências de desenvolvimento
+pytest==6.2.4
+flake8==3.9.2
