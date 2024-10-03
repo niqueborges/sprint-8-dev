@@ -4,6 +4,7 @@ frameworkVersion: '4'
 provider:
   name: aws
   runtime: python3.9
+  region: us-east-1
 
 functions:
   health:
@@ -12,12 +13,14 @@ functions:
       - httpApi:
           path: /
           method: get
+
   v1Description:
     handler: handler.v1_description
     events:
       - httpApi:
           path: /v1
           method: get
+
   v2Description:
     handler: handler.v2_description
     events:
@@ -25,6 +28,15 @@ functions:
           path: /v2
           method: get
 
+  vision:
+    handler: handler.vision
+    events:
+      - httpApi:
+          path: /v1/vision
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
   - serverless-python-requirements
+
