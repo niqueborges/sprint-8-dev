@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 add_env_var_module = importlib.import_module("visao-computacional.dev.tasks.check_env")
 add_env_var = add_env_var_module.add_env_var
 
-def create_bucket(gatos-sapecas):
+def create_bucket(bucket_name):
     s3 = boto3.client('s3')
 
     try:
@@ -24,7 +24,7 @@ def create_bucket(gatos-sapecas):
             # Cria o bucket
             s3.create_bucket(Bucket=bucket_name)
             print(f"Bucket {bucket_name} criado.")
-            
+
             # Desabilita o bloqueio de ACLs públicas
             s3.put_public_access_block(
                 Bucket=bucket_name,
@@ -59,18 +59,19 @@ def create_bucket(gatos-sapecas):
         except ClientError as e:
             print(f"Erro ao criar o bucket: {e}")
             return False
-        
+
     # Adicionar as informações ao .env
     add_env_var({
         "BUCKET_NAME": bucket_name, 
-        "VISION_S3_DIR": "vision_data"  # Atualiza o diretório para o contexto do projeto vision
+        "VISION_S3_DIR": "myphotos"  # Atualiza o diretório para o contexto do projeto vision
     })
 
     return True
 
 if __name__ == "__main__":
-    bucket_name = "gatos-sapecas"  # Nome do bucket ajustado para o projeto
+    bucket_name = "gato-sapeca"  # Nome do bucket ajustado para o projeto
     create_bucket(bucket_name)
+
 
 
 

@@ -28,13 +28,14 @@ functions:
           path: /v2
           method: get
 
+  functions:
   vision:
     handler: handler.vision
     events:
       - httpApi:
           path: /v1/vision
           method: post
-          cors: true
+
 
 plugins:
   - serverless-offline

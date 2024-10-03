@@ -1,8 +1,9 @@
 # Ignore node_modules directory
 node_modules/
-                
+				
 # Ignore log files
 *.log
+__pycache__/
 
 # Ignore build directories
 dist/
@@ -11,10 +12,8 @@ build/
 
 # Ignore environment variable files
 .env
-env/
 venv/
 .venv/
-
 
 # Ignore OS-specific files
 .DS_Store
@@ -26,10 +25,7 @@ Thumbs.db
 
 # Distribution / packaging
 .Python
-env/
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -38,7 +34,6 @@ lib64/
 parts/
 sdist/
 var/
-*.egg-info/
 .installed.cfg
 *.egg
 
