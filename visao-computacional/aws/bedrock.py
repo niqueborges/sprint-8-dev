@@ -19,6 +19,8 @@ def detect_edges(image_path, output_path):
     print(f"Bordas detectadas salvas em: {output_path}")
 
 if __name__ == "__main__":
-    input_image_path = 'caminho/para/sua/imagem.jpg'
-    output_image_path = 'caminho/para/salvar/bordas.jpg'
+    # Caminhos de entrada e saída da imagem
+    input_image_path = 'caminho/para/sua/imagem.jpg'  # Altere para o caminho da sua imagem
+    output_image_path = 'caminho/para/salvar/bordas.jpg'  # Altere para o caminho de saída desejado
+    
     detect_edges(input_image_path, output_image_path)

@@ -1,49 +1,87 @@
 import json
+import boto3
+from botocore.exceptions import ClientError
+from datetime import datetime
 
-# Função 'health' que é executada para verificar o status da aplicação
+rekognition_client = boto3.client('rekognition')
+
+def create_response(status_code, message):
+    """Cria uma resposta padrão para a API."""
+    return {
+        "statusCode": status_code,
+        "body": json.dumps(message)
+    }
+
 def health(event, context):
-    # Monta o corpo da resposta com uma mensagem de sucesso e os dados recebidos no evento
+    """Verifica se a função está funcionando corretamente."""
     body = {
-        "message": "Go Serverless v3.0! Your function executed successfully!",  # Mensagem de sucesso
-        "input": event,  # Dados recebidos como input no evento
+        "message": "Go Serverless v3.0! Your function executed successfully!",
+        "input": event,
     }
+    return create_response(200, body)
 
-    # Cria a resposta HTTP com o status 200 (sucesso) e o corpo em formato JSON
-    response = {
-        "statusCode": 200,  # Código de status HTTP para sucesso
-        "body": json.dumps(body),  # Converte o corpo da resposta para uma string JSON
-    }
-
-    return response  # Retorna a resposta para ser enviada de volta ao solicitante
-
-
-# Função 'v1_description' que retorna a descrição da API VISION versão 1
 def v1_description(event, context):
-    # Monta o corpo da resposta com a versão da API
-    body = {
-        "message": "VISION api version 1."  # Mensagem com a descrição da versão 1 da API
-    }
+    """Retorna a descrição da API VISION versão 1."""
+    return create_response(200, {"message": "VISION API version 1."})
 
-    # Cria a resposta HTTP com o status 200 (sucesso) e o corpo em formato JSON
-    response = {
-        "statusCode": 200,  # Código de status HTTP para sucesso
-        "body": json.dumps(body),  # Converte o corpo da resposta para uma string JSON
-    }
-
-    return response  # Retorna a resposta para ser enviada de volta ao solicitante
-
-
-# Função 'v2_description' que retorna a descrição da API VISION versão 2
 def v2_description(event, context):
-    # Monta o corpo da resposta com a versão da API
-    body = {
-        "message": "VISION api version 2."  # Mensagem com a descrição da versão 2 da API
+    """Retorna a descrição da API VISION versão 2."""
+    return create_response(200, {"message": "VISION API version 2."})
+
+def vision(event, context):
+    """Processa a imagem e retorna as emoções detectadas."""
+    body = json.loads(event['body'])
+    
+    bucket = body.get("bucket")
+    image_name = body.get("imageName")
+
+    if not bucket or not image_name:
+        return create_response(400, {"message": "bucket and imageName are required."})
+
+    # Chama o Rekognition para detectar emoções
+    try:
+        response = rekognition_client.detect_faces(
+            Image={
+                'S3Object': {
+                    'Bucket': bucket,
+                    'Name': image_name
+                }
+            },
+            Attributes=['ALL']
+        )
+    except ClientError as e:
+        print(f"Error calling Rekognition: {e}")
+        return create_response(500, {"message": "Error calling Rekognition service."})
+
+    # Processa a resposta do Rekognition
+    faces_data = []
+    if 'FaceDetails' in response:
+        for face in response['FaceDetails']:
+            emotions = face.get('Emotions', [])
+            if emotions:
+                classified_emotion = max(emotions, key=lambda x: x['Confidence'])
+                faces_data.append({
+                    "position": face['BoundingBox'],
+                    "classified_emotion": classified_emotion['Type'],
+                    "classified_emotion_confidence": classified_emotion['Confidence'],
+                })
+
+    # Monta a resposta
+    created_image = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    result = {
+        "url_to_image": f"https://{bucket}.s3.amazonaws.com/{image_name}",
+        "created_image": created_image,
+        "faces": faces_data or [{
+            "position": {
+                "Height": None,
+                "Left": None,
+                "Top": None,
+                "Width": None
+            },
+            "classified_emotion": None,
+            "classified_emotion_confidence": None
+        }]
     }
 
-    # Cria a resposta HTTP com o status 200 (sucesso) e o corpo em formato JSON
-    response = {
-        "statusCode": 200,  # Código de status HTTP para sucesso
-        "body": json.dumps(body),  # Converte o corpo da resposta para uma string JSON
-    }
-
-    return response  # Retorna a resposta para ser enviada de volta ao solicitante
+    print(result)  # Para registro no CloudWatch
+    return create_response(200, result)

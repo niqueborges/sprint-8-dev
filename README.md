@@ -1,20 +1,20 @@
+Seu documento parece muito bem estruturado e claro. Aqui estão algumas correções e sugestões de formatação para melhorar a clareza e a consistência:
+
+```markdown
 # **API Vision - Avaliação Sprint 8**
 
 ## **👥 Desenvolvedores**
 | [<img loading="lazy" src="https://avatars.githubusercontent.com/u/69771619?v=4" width="115" alt="Carlos Altomare Catao">](https://github.com/CarlosCatao) <br>[Carlos Altomare Catao](https://github.com/CarlosCatao) | [<img loading="lazy" src="https://avatars.githubusercontent.com/u/130758430?v=4" width="115" alt="Hugo Bessa Susini Ribeiro">](https://github.com/hsusini) <br>[Hugo Bessa Susini Ribeiro](https://github.com/hsusini) | [<img loading="lazy" src="https://avatars.githubusercontent.com/u/165324231?v=4" width="115" alt="Paulo Henrique de Oliveira Carvalho">](https://github.com/Paulo-Henrique06) <br>[Paulo Henrique de Oliveira Carvalho](https://github.com/Paulo-Henrique06) | [<img loading="lazy" src="https://avatars.githubusercontent.com/u/95103547?v=4" width="115" alt="Monique da Silva Borges">](https://github.com/niqueborges) <br>[Monique da Silva Borges](https://github.com/niqueborges) |
 |:---:|:---:|:---:|:---:|
 
-
-
-|:---:|:---:|:---:|:---:|
-
 ---
 
 ## **📑 Índice**
+
 - [📈 Status do Projeto](#-status-do-projeto)
 - [✨ Funcionalidades](#-funcionalidades)
 - [⚙️ Arquitetura e Fluxo de Trabalho](#-arquitetura-e-fluxo-de-trabalho)
-- [⚙️ Variáveis de Ambiente](#-variáveis-de-ambiente)
+- [⚙️ Variáveis de Ambiente](#⚙️-variáveis-de-ambiente)
 - [📦 Como Rodar a Aplicação](#-como-rodar-a-aplicação)
 - [🚀 Deploy](#-deploy)
 - [💻 Tecnologias Utilizadas](#-tecnologias-utilizadas)
@@ -27,6 +27,7 @@
 ---
 
 ## **📈 Status do Projeto**
+
 🚀 **Status**: Em desenvolvimento
 
 Este projeto tem como objetivo criar uma **API de Visão Computacional**, utilizando serviços da **AWS** para analisar emoções em imagens e identificar a presença de pets. As principais tecnologias envolvem o **Amazon Rekognition** para análise de imagens e o **Amazon Bedrock** para geração de respostas relacionadas a pets. O projeto também integra o **CloudWatch** para monitoramento de logs e desempenho. O projeto não armazena informações localmente, pois as imagens são processadas diretamente dos **Buckets do S3** e os resultados são retornados ao usuário no formato de resposta JSON.
@@ -34,6 +35,7 @@ Este projeto tem como objetivo criar uma **API de Visão Computacional**, utiliz
 ---
 
 ## **✨ Funcionalidades**
+
 1. **Análise de Emoções em Imagens**:
    - A API recebe o nome de uma imagem e verifica, através do **Amazon Rekognition**, as emoções predominantes detectadas nas faces presentes.
 
@@ -46,10 +48,11 @@ Este projeto tem como objetivo criar uma **API de Visão Computacional**, utiliz
 ---
 
 ## **⚙️ Arquitetura e Fluxo de Trabalho**
+
 A arquitetura do projeto envolve os seguintes componentes:
 
 1. **API Vision**:
-Exemplo de requisição POST para a rota `/v1/vision`:
+   Exemplo de requisição POST para a rota `/v1/vision`:
    ```json
    {
      "bucket": "myphotos",
@@ -78,7 +81,7 @@ Exemplo de requisição POST para a rota `/v1/vision`:
    ```
 
 2. **Detecção de Pets e Dicas (v2)**:
-Exemplo de requisição POST para a rota `/v2/vision`:
+   Exemplo de requisição POST para a rota `/v2/vision`:
    ```json
    {
      "bucket": "myphotos",
@@ -104,16 +107,14 @@ Exemplo de requisição POST para a rota `/v2/vision`:
        }
      ],
      "pet_detected": true,
-     "pet_advice": "Labradores são cães ativos, lembre-se de oferecer exercícios diários."
+     "pet_advice": "Labradores são cães ativos; lembre-se de oferecer exercícios diários."
    }
    ```
 
 ---
 
----
-
 ## **⚙️ Variáveis de Ambiente**
-As variáveis de ambiente necessárias para a execução incluem as credenciais da **AWS** (chave de acesso e chave secreta) e detalhes dos serviços configurados como o **Amazon Rekognition** e **Bedrock**.
+As variáveis de ambiente necessárias para a execução incluem as credenciais da **AWS** (chave de acesso e chave secreta) e detalhes dos serviços configurados, como o **Amazon Rekognition** e **Bedrock**.
 
 ---
 
@@ -132,13 +133,13 @@ As variáveis de ambiente necessárias para a execução incluem as credenciais 
 
 2. **Criar o ambiente de desenvolvimento**:
 
-   Windows
+   **Windows**:
    ```bash
    python -m venv vision-env
    .\vision-env\Scripts\activate.bat
    ```
 
-   Linux
+   **Linux**:
    ```bash
    python -m venv vision-env
    source vision-env/bin/activate
@@ -208,16 +209,16 @@ SPRINT-8-pb-aws-junho/
 ```
 ---
 
-## **📐 Padrões Utilizados**
-- **Commits Semânticos**: Para manter um histórico
+## **📐 P
 
- claro e descritivo.
+adrões Utilizados**
+- **Commits Semânticos**: Para manter um histórico claro e descritivo.
 - **RESTful API**: Seguindo as boas práticas de desenvolvimento de APIs.
 
 ---
 
 ## **📅 Metodologia de Desenvolvimento**
-O desenvolvimento seguiu a metodologia **Scrum**, com sprints semanais, reuniões de standup, e retrospectivas.
+O desenvolvimento seguiu a metodologia **Scrum**, com sprints semanais, reuniões de standup e retrospectivas.
 
 ---
 
@@ -230,3 +231,4 @@ O desenvolvimento seguiu a metodologia **Scrum**, com sprints semanais, reuniõe
 
 ## **📝 Licença**
 Este projeto está licenciado sob a licença MIT.
+```

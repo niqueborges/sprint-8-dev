@@ -13,7 +13,7 @@ s3 = boto3.client('s3')
 def lambda_handler(event, context):
     try:
         # Extrai os parâmetros do corpo da requisição
-        body = json.loads(event['body'])
+        body = json.loads(event.get('body', '{}'))
         bucket = body.get('bucket')
         image_name = body.get('imageName')
 
@@ -37,39 +37,38 @@ def lambda_handler(event, context):
         faces_detected = response.get('FaceDetails', [])
         created_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
+        # Se não houver faces detectadas, retorna uma resposta apropriada
         if not faces_detected:
-            # Retorno se não houver nenhuma face detectada
             return {
                 "statusCode": 200,
                 "body": json.dumps({
                     "url_to_image": image_url,
                     "created_image": created_time,
-                    "faces": [
-                        {
-                            "position": {
-                                "Height": None,
-                                "Left": None,
-                                "Top": None,
-                                "Width": None
-                            },
-                            "classified_emotion": None,
-                            "classified_emotion_confidence": None
-                        }
-                    ]
+                    "faces": [{
+                        "position": {
+                            "Height": None,
+                            "Left": None,
+                            "Top": None,
+                            "Width": None
+                        },
+                        "classified_emotion": None,
+                        "classified_emotion_confidence": None
+                    }]
                 })
             }
 
         # Processa as faces detectadas
         faces_output = []
         for face in faces_detected:
-            emotions = face['Emotions']
-            primary_emotion = max(emotions, key=lambda x: x['Confidence'])
-            face_data = {
-                "position": face['BoundingBox'],
-                "classified_emotion": primary_emotion['Type'],
-                "classified_emotion_confidence": primary_emotion['Confidence']
-            }
-            faces_output.append(face_data)
+            emotions = face.get('Emotions', [])
+            if emotions:
+                primary_emotion = max(emotions, key=lambda x: x['Confidence'])
+                face_data = {
+                    "position": face['BoundingBox'],
+                    "classified_emotion": primary_emotion['Type'],
+                    "classified_emotion_confidence": primary_emotion['Confidence']
+                }
+                faces_output.append(face_data)
 
         # Monta a resposta com as emoções classificadas
         response_body = {
@@ -86,10 +85,16 @@ def lambda_handler(event, context):
             "body": json.dumps(response_body)
         }
 
+    except json.JSONDecodeError:
+        # Captura erro de decodificação JSON
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"message": "Invalid JSON format."})
+        }
     except Exception as e:
-        # Registrar erro
+        # Registrar erro com mais contexto
         print(f"Erro: {e}")
         return {
             "statusCode": 500,
-            "body": json.dumps({"message": "Internal Server Error"})
+            "body": json.dumps({"message": "Internal Server Error", "error": str(e)})
         }

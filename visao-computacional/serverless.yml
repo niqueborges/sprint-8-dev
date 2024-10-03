@@ -1,5 +1,4 @@
-service: visao-computacional
-frameworkVersion: '4'
+service: visao-computacional  # ou outro nome que siga as regras
 
 provider:
   name: aws
@@ -28,7 +27,6 @@ functions:
           path: /v2
           method: get
 
-  functions:
   vision:
     handler: handler.vision
     events:
@@ -36,8 +34,6 @@ functions:
           path: /v1/vision
           method: post
 
-
 plugins:
   - serverless-offline
   - serverless-python-requirements
-
