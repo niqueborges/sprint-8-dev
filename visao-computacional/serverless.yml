@@ -1,4 +1,5 @@
-service: visao-computacional  # ou outro nome que siga as regras
+service: visao-computacional
+frameworkVersion: '4'
 
 provider:
   name: aws
@@ -9,31 +10,63 @@ functions:
   health:
     handler: handler.health
     events:
-      - httpApi:
+      - http:
           path: /
           method: get
-
   v1Description:
     handler: handler.v1_description
     events:
-      - httpApi:
+      - http:
           path: /v1
           method: get
-
   v2Description:
     handler: handler.v2_description
     events:
-      - httpApi:
+      - http:
           path: /v2
           method: get
-
   vision:
     handler: handler.vision
     events:
-      - httpApi:
-          path: /v1/vision
+      - http:
+          path: v1/vision
           method: post
+          cors: true
+
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+    layer: true
+
+resources:
+  Resources:
+    VisionRole:
+      Type: "AWS::IAM::Role"
+      Properties:  
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: RekognitionS3Policy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - rekognition:DetectFaces
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - s3:GetObject
+                  Resource:
+                    - "arn:aws:s3:::gato-sapeca/*"  # Especifique o bucket aqui
 
 plugins:
   - serverless-offline
   - serverless-python-requirements
+

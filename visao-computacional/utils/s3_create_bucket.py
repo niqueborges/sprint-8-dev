@@ -5,12 +5,18 @@ import json
 from botocore.exceptions import ClientError
 import importlib
 
-# Adiciona o caminho do projeto ao sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Adiciona o caminho do diretório pai ao sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))  # Diretório atual (utils)
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))  # Diretório pai (visao-computacional)
+sys.path.append(parent_dir)
 
 # Importa o módulo correto para o projeto
-add_env_var_module = importlib.import_module("visao-computacional.handlers.check_env")
-add_env_var = add_env_var_module.add_env_var
+try:
+    add_env_var_module = importlib.import_module("utils.check_env")  # Ajuste o caminho conforme necessário
+    add_env_var = add_env_var_module.add_env_var
+except ModuleNotFoundError as e:
+    print(f"Erro ao importar o módulo: {e}")
+    sys.exit(1)
 
 def create_bucket(bucket_name):
     s3 = boto3.client('s3')

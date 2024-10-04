@@ -1,6 +1,3 @@
-Seu documento parece muito bem estruturado e claro. Aqui estão algumas correções e sugestões de formatação para melhorar a clareza e a consistência:
-
-```markdown
 # **API Vision - Avaliação Sprint 8**
 
 ## **👥 Desenvolvedores**

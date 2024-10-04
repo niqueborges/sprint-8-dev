@@ -2,7 +2,7 @@ import os
 import shutil
 
 
-def clean_cache() -> None:
+def clean_cache() -> None: 
     """Remove __pycache__ and .pytest_cache directories."""
     cache_dirs = ["__pycache__", ".pytest_cache"]
     for root, dirs, _ in os.walk("."):

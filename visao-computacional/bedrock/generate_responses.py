@@ -1,27 +1,42 @@
-import boto3
 import json
+import os  # Para verificar variáveis de ambiente
+import boto3
 from datetime import datetime
-from dotenv import load_dotenv  
-import os
+import traceback
+from dotenv import load_dotenv  # Importa para carregar variáveis de ambiente
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
+# Inicializa os clientes AWS
 rekognition = boto3.client('rekognition')
-s3 = boto3.client('s3')
+bedrock = boto3.client('bedrock')  # Inicializa o cliente Bedrock
 
-def lambda_handler(event, context):
+# Função para verificar as variáveis de ambiente
+def check_env_vars():
+    required_vars = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'BUCKET_NAME']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        raise EnvironmentError(f"Missing environment variables: {', '.join(missing_vars)}")
+    else:
+        print("All necessary environment variables are set.")
+
+def vision(event, context):
     try:
-        # Extrai os parâmetros do corpo da requisição
+        # Verifica se as variáveis de ambiente necessárias estão definidas
+        check_env_vars()
+
+        # Tenta extrair e validar o corpo da requisição
         body = json.loads(event.get('body', '{}'))
         bucket = body.get('bucket')
         image_name = body.get('imageName')
 
-        # Verificar se bucket e image_name foram fornecidos
+        # Valida se os parâmetros essenciais estão presentes
         if not bucket or not image_name:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"message": "Bucket and imageName must be provided."})
+                "body": json.dumps({"message": "Missing 'bucket' or 'imageName' in the request body"})
             }
 
         # Monta a URL da imagem no S3
@@ -33,7 +48,6 @@ def lambda_handler(event, context):
             Attributes=['ALL']
         )
 
-        # Verifica se há faces detectadas
         faces_detected = response.get('FaceDetails', [])
         created_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
@@ -70,6 +84,11 @@ def lambda_handler(event, context):
                 }
                 faces_output.append(face_data)
 
+                # Integração com Bedrock
+                detected_emotion = primary_emotion['Type']
+                response_bedrock = visao_computacional(detected_emotion)  # Chama a função com a emoção detectada
+                print(response_bedrock)  # Aqui você pode ver a resposta do Bedrock
+
         # Monta a resposta com as emoções classificadas
         response_body = {
             "url_to_image": image_url,
@@ -98,3 +117,16 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"message": "Internal Server Error", "error": str(e)})
         }
+
+def visao_computacional(detected_emotion):
+    # A lógica do Bedrock para responder com base na emoção detectada
+    responses = {
+        "HAPPY": "The detected emotion is HAPPY. The pet seems to be very expressive!",
+        "SAD": "The detected emotion is SAD. The pet might need some comfort.",
+        "ANGRY": "The detected emotion is ANGRY. The pet is feeling agitated.",
+        "SURPRISED": "The detected emotion is SURPRISED. The pet is intrigued by something!",
+        "NEUTRAL": "The detected emotion is NEUTRAL. The pet is calm."
+    }
+
+    return responses.get(detected_emotion, "Emotion not recognized.")
+
