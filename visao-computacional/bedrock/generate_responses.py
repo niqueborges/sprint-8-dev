@@ -1,16 +1,16 @@
-import json
-import os  # Para verificar variáveis de ambiente
 import boto3
+import json
 from datetime import datetime
-import traceback
+import os
 from dotenv import load_dotenv  # Importa para carregar variáveis de ambiente
+import traceback
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Inicializa os clientes AWS
+# Inicializa os clientes AWS Rekognition e Bedrock
 rekognition = boto3.client('rekognition')
-bedrock = boto3.client('bedrock')  # Inicializa o cliente Bedrock
+bedrock = boto3.client('bedrock')
 
 # Função para verificar as variáveis de ambiente
 def check_env_vars():
@@ -22,6 +22,7 @@ def check_env_vars():
     else:
         print("All necessary environment variables are set.")
 
+# Função principal do Lambda
 def vision(event, context):
     try:
         # Verifica se as variáveis de ambiente necessárias estão definidas
@@ -58,16 +59,8 @@ def vision(event, context):
                 "body": json.dumps({
                     "url_to_image": image_url,
                     "created_image": created_time,
-                    "faces": [{
-                        "position": {
-                            "Height": None,
-                            "Left": None,
-                            "Top": None,
-                            "Width": None
-                        },
-                        "classified_emotion": None,
-                        "classified_emotion_confidence": None
-                    }]
+                    "faces": [],
+                    "message": "No faces detected."
                 })
             }
 
@@ -86,10 +79,10 @@ def vision(event, context):
 
                 # Integração com Bedrock
                 detected_emotion = primary_emotion['Type']
-                response_bedrock = visao_computacional(detected_emotion)  # Chama a função com a emoção detectada
-                print(response_bedrock)  # Aqui você pode ver a resposta do Bedrock
+                response_bedrock = visao_computacional(detected_emotion)  # Chama a função para gerar uma narrativa
+                face_data["bedrock_response"] = response_bedrock  # Adiciona a resposta do Bedrock ao output
 
-        # Monta a resposta com as emoções classificadas
+        # Monta a resposta com as emoções classificadas e narrativas geradas pelo Bedrock
         response_body = {
             "url_to_image": image_url,
             "created_image": created_time,
@@ -118,15 +111,24 @@ def vision(event, context):
             "body": json.dumps({"message": "Internal Server Error", "error": str(e)})
         }
 
+# Função que integra com o Bedrock para gerar narrativa baseada na emoção detectada
 def visao_computacional(detected_emotion):
-    # A lógica do Bedrock para responder com base na emoção detectada
-    responses = {
-        "HAPPY": "The detected emotion is HAPPY. The pet seems to be very expressive!",
-        "SAD": "The detected emotion is SAD. The pet might need some comfort.",
-        "ANGRY": "The detected emotion is ANGRY. The pet is feeling agitated.",
-        "SURPRISED": "The detected emotion is SURPRISED. The pet is intrigued by something!",
-        "NEUTRAL": "The detected emotion is NEUTRAL. The pet is calm."
-    }
+    try:
+        # Cria um prompt dinâmico com base na emoção detectada
+        prompt = f"The detected emotion is {detected_emotion}. Can you provide a brief narrative about what this emotion might represent in the context of a pet's behavior?"
 
-    return responses.get(detected_emotion, "Emotion not recognized.")
+        # Chama o Bedrock para gerar uma resposta com base no prompt
+        response = bedrock.invoke_model(
+            modelId='gpt-3.5-turbo',  # Escolha o modelo apropriado
+            prompt=prompt,
+            max_tokens=100  # Define o número de tokens para limitar o tamanho da resposta
+        )
+        generated_text = response['text']  # Extrai o texto gerado pelo Bedrock
+
+        return generated_text
+
+    except Exception as e:
+        print(f"Erro na integração com o Bedrock: {e}")
+        return "Erro ao gerar narrativa usando o Bedrock."
+
 
