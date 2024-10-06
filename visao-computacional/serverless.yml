@@ -6,36 +6,33 @@ provider:
   runtime: python3.9
   region: us-east-1
   environment:
-    BUCKET_NAME: ${env:BUCKET_NAME}
-
-
+    BUCKET_NAME: ${env:BUCKET_NAME, 'default-bucket-name'}  
 functions:
   health:
-    handler: handler.health
+    handler: lambda_function.handler.health
     events:
       - http:
           path: /
           method: get
   v1Description:
-    handler: handler.v1_description
+    handler: lambda_function.handler.v1_description
     events:
       - http:
           path: /v1
           method: get
   v2Description:
-    handler: handler.v2_description
+    handler: lambda_function.handler.v2_description
     events:
       - http:
           path: /v2
           method: get
   vision:
-    handler: handler.vision
+    handler: lambda_function.handler.vision
     events:
       - http:
           path: v1/vision
           method: post
           cors: true
-
 
 custom:
   pythonRequirements:
@@ -67,9 +64,11 @@ resources:
                   Action:
                     - s3:GetObject
                   Resource:
-                    - "arn:aws:s3:::gato-sapeca/*"  # Especifique o bucket aqui
+                    - "arn:aws:s3:::gato-sapeca/*"
 
 plugins:
   - serverless-offline
   - serverless-python-requirements
+  - serverless-dotenv-plugin
+
 
