@@ -64,7 +64,7 @@ resources:
                   Action:
                     - s3:GetObject
                   Resource:
-                    - "arn:aws:s3:::gato-sapeca/*"
+                    - "arn:aws:s3:::cao-sapeca/*"
 
 plugins:
   - serverless-offline

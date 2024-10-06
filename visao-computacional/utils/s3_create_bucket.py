@@ -93,6 +93,6 @@ def create_bucket(bucket_name):
     print(f"Variáveis de ambiente adicionadas com sucesso.")
 
 if __name__ == "__main__":
-    bucket_name = "gato-sapeca"  # Nome do bucket ajustado para o projeto
+    bucket_name = "cao-sapeca"  # Nome do bucket ajustado para o projeto
     create_bucket(bucket_name)
 
