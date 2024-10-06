@@ -6,7 +6,8 @@ provider:
   runtime: python3.9
   region: us-east-1
   environment:
-    BUCKET_NAME: ${env:BUCKET_NAME, 'default-bucket-name'}  
+    BUCKET_NAME: ${env:BUCKET_NAME, 'default-bucket-name'}
+  
 functions:
   health:
     handler: lambda_function.handler.health
@@ -27,7 +28,8 @@ functions:
           path: /v2
           method: get
   vision:
-    handler: lambda_function.handler.vision
+    handler: lambda_function.handler.v1_vision
+    role: VisionRole
     events:
       - http:
           path: v1/vision
@@ -37,7 +39,7 @@ functions:
 custom:
   pythonRequirements:
     dockerizePip: false
-    layer: true
+    layer: false
 
 resources:
   Resources:
@@ -64,11 +66,12 @@ resources:
                   Action:
                     - s3:GetObject
                   Resource:
-                    - "arn:aws:s3:::gato-sapeca/*"
+                    - "arn:aws:s3:::${self:provider.environment.BUCKET_NAME}/*"
 
 plugins:
   - serverless-offline
   - serverless-python-requirements
   - serverless-dotenv-plugin
+
 
 
