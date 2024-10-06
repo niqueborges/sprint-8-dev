@@ -9,8 +9,8 @@ import traceback
 load_dotenv()
 
 # Inicializa os clientes AWS Rekognition e Bedrock
-rekognition = boto3.client('rekognition')
-bedrock = boto3.client('bedrock')
+rekognition = boto3.client('rekognition', region_name='us-east-1')
+bedrock = boto3.client('bedrock', region_name='us-east-1')
 
 # Função para verificar as variáveis de ambiente
 def check_env_vars():

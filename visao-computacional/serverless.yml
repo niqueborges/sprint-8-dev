@@ -5,6 +5,9 @@ provider:
   name: aws
   runtime: python3.9
   region: us-east-1
+  environment:
+    BUCKET_NAME: ${env:BUCKET_NAME}
+
 
 functions:
   health:

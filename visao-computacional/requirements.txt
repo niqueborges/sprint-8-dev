@@ -1,0 +1,11 @@
+# Dependências principais
+flask
+requests
+datetime
+boto3
+botocore
+s3transfer
+
+# Dependências de desenvolvimento
+pytest
+flake8

@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 # Inicializa os clientes AWS Rekognition e S3
-rekognition = boto3.client('rekognition')
+rekognition = boto3.client('rekognition', region_name='us-east-1')  
 s3 = boto3.client('s3')
 
 # Função para verificar as variáveis de ambiente

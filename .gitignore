@@ -36,6 +36,9 @@ sdist/
 var/
 .installed.cfg
 *.egg
+dotenv/
+bin/
+python_dotenv-1.0.1.dist-info/
 
 # Serverless directories
 .serverless

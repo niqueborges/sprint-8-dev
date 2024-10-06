@@ -22,22 +22,27 @@ def create_bucket(bucket_name):
     s3 = boto3.client('s3')
 
     try:
-        # Verifica se o bucket já existe
+        # Verifica se o bucket já existe (exceção será lançada se o bucket não existir)
         s3.head_bucket(Bucket=bucket_name)
         print(f"Bucket {bucket_name} já existe.")
         return True  # Retorna True se o bucket já existir
     except ClientError as e:
-        # Se o bucket não existir, tenta criá-lo
         if e.response['Error']['Code'] == '404':
             try:
-                # Cria o bucket
-                s3.create_bucket(
-                    Bucket=bucket_name,
-                    CreateBucketConfiguration={
-                        'LocationConstraint': boto3.session.Session().region_name  # Define a região
-                    }
-                )
-                print(f"Bucket {bucket_name} criado.")
+                # Obtém a região da sessão atual
+                region = boto3.session.Session().region_name
+
+                # Cria o bucket, sem LocationConstraint para 'us-east-1'
+                if region == 'us-east-1':
+                    s3.create_bucket(Bucket=bucket_name)
+                else:
+                    s3.create_bucket(
+                        Bucket=bucket_name,
+                        CreateBucketConfiguration={
+                            'LocationConstraint': region  # Define a região
+                        }
+                    )
+                print(f"Bucket {bucket_name} criado com sucesso.")
 
                 # Desabilita o bloqueio de ACLs públicas
                 s3.put_public_access_block(
@@ -49,7 +54,7 @@ def create_bucket(bucket_name):
                         'RestrictPublicBuckets': False
                     }
                 )
-                
+
                 # Define uma política de bucket para permitir acesso público
                 bucket_policy = {
                     "Version": "2012-10-17",
@@ -82,7 +87,7 @@ def create_bucket(bucket_name):
 
     # Adicionar as informações ao .env se o bucket foi criado com sucesso
     add_env_var({
-        "BUCKET_NAME": bucket_name, 
+        "BUCKET_NAME": bucket_name,
         "VISION_S3_DIR": "myphotos"  # Atualiza o diretório para o contexto do projeto
     })
     print(f"Variáveis de ambiente adicionadas com sucesso.")
@@ -90,3 +95,4 @@ def create_bucket(bucket_name):
 if __name__ == "__main__":
     bucket_name = "gato-sapeca"  # Nome do bucket ajustado para o projeto
     create_bucket(bucket_name)
+

@@ -1,11 +1,15 @@
 import json
-import os  # Para verificar variáveis de ambiente
+import os
 import boto3
 from datetime import datetime
+from dotenv import load_dotenv  # Importa para carregar variáveis de ambiente
 import traceback
 
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
+
 # Inicializa o cliente AWS Rekognition
-rekognition = boto3.client('rekognition')
+rekognition = boto3.client('rekognition', region_name='us-east-1')  
 
 # Função para verificar as variáveis de ambiente
 def check_env_vars():
@@ -14,8 +18,6 @@ def check_env_vars():
     
     if missing_vars:
         raise EnvironmentError(f"Missing environment variables: {', '.join(missing_vars)}")
-    else:
-        print("All necessary environment variables are set.")
 
 # Função de verificação de saúde do serviço
 def health(event, context):
@@ -46,6 +48,8 @@ def vision(event, context):
 
         # Tenta extrair e validar o corpo da requisição
         body = json.loads(event.get('body', '{}'))
+        print("Requisição recebida:", body)  # Para debug
+
         bucket = body.get('bucket')
         image_name = body.get('imageName')
 
@@ -56,14 +60,18 @@ def vision(event, context):
                 "body": json.dumps({"message": "Missing 'bucket' or 'imageName' in the request body"})
             }
 
+        # Atualiza o image_name para incluir a pasta myphotos
+        image_key = f"myphotos/{image_name}"  # Adicionando a pasta "myphotos"
+
         # Monta a URL da imagem no S3
-        image_url = f"https://{bucket}.s3.amazonaws.com/{image_name}"
+        image_url = f"https://{bucket}.s3.amazonaws.com/{image_key}"
 
         # Chama o AWS Rekognition para detectar emoções nas faces
         response = rekognition.detect_faces(
-            Image={'S3Object': {'Bucket': bucket, 'Name': image_name}},
+            Image={'S3Object': {'Bucket': bucket, 'Name': image_key}},  # Usa o caminho atualizado
             Attributes=['ALL']
         )
+        print("Resposta do Rekognition:", response)  # Para debug
 
         faces_detected = response.get('FaceDetails', [])
         created_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -93,14 +101,15 @@ def vision(event, context):
         # Processar as faces detectadas
         faces_output = []
         for face in faces_detected:
-            emotions = face['Emotions']
-            primary_emotion = max(emotions, key=lambda x: x['Confidence'])
-            face_data = {
-                "position": face['BoundingBox'],
-                "classified_emotion": primary_emotion['Type'],
-                "classified_emotion_confidence": primary_emotion['Confidence']
-            }
-            faces_output.append(face_data)
+            emotions = face.get('Emotions', [])
+            if emotions:
+                primary_emotion = max(emotions, key=lambda x: x['Confidence'])
+                face_data = {
+                    "position": face['BoundingBox'],
+                    "classified_emotion": primary_emotion['Type'],
+                    "classified_emotion_confidence": primary_emotion['Confidence']
+                }
+                faces_output.append(face_data)
 
         # Monta a resposta final
         response_body = {
@@ -118,34 +127,14 @@ def vision(event, context):
         }
 
     except json.JSONDecodeError:
-        # Erro ao decodificar o JSON da requisição
         return {
             "statusCode": 400,
             "body": json.dumps({"message": "Invalid JSON in the request body"})
         }
-
-    except boto3.exceptions.Boto3Error as e:
-        # Erros relacionados ao AWS Rekognition ou boto3
-        print(f"AWS Error: {str(e)}")
-        return {
-            "statusCode": 502,
-            "body": json.dumps({"message": "Error calling AWS Rekognition"})
-        }
-
-    except EnvironmentError as e:
-        # Erros relacionados às variáveis de ambiente
-        print(f"Environment Error: {str(e)}")
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"message": f"Environment Error: {str(e)}"})
-        }
-
     except Exception as e:
-        # Loga qualquer erro não previsto no CloudWatch
         print(f"Erro inesperado: {str(e)}")
         traceback.print_exc()  # Loga o traceback completo para facilitar o debug
         return {
             "statusCode": 500,
             "body": json.dumps({"message": "Internal Server Error"})
         }
-
