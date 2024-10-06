@@ -1,0 +1,39 @@
+service: visao-computacional
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+
+functions:
+  health:
+    handler: handler.health
+    events:
+      - httpApi:
+          path: /
+          method: get
+  v1Description:
+    handler: handler.v1_description
+    events:
+      - httpApi:
+          path: /v1
+          method: get
+  v2Description:
+    handler: handler.v2_description
+    events:
+      - httpApi:
+          path: /v2
+          method: get
+  v1Vision:
+    handler: handler.v1_vision
+    events:
+      - httpApi:
+          path: /v1/vision
+          method: post
+
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+
