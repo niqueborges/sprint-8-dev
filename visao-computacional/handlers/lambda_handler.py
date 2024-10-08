@@ -1,11 +1,16 @@
 import json
 import os
 import boto3
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 import traceback
 import logging
 from botocore.exceptions import ClientError
+
+current_dir = os.path.dirname(os.path.abspath(__file__))  # Diretório atual (handlers)
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))  # Diretório pai (visao-computacional)
+sys.path.append(parent_dir)
 
 # Configuração do logger
 logging.basicConfig(level=logging.INFO)

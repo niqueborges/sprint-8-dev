@@ -2,8 +2,6 @@ import sys
 import os
 import json
 import logging
-from services.bedrock_service import invoke_bedrock_model
-from services.get_image import get_image_details, detect_face_emotions  
 from botocore.exceptions import BotoCoreError, ClientError
 
 # Configuração do logger
@@ -14,6 +12,9 @@ logger = logging.getLogger(__name__)
 current_dir = os.path.dirname(os.path.abspath(__file__))  # Diretório atual (handlers)
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))  # Diretório pai (visao-computacional)
 sys.path.append(parent_dir)
+
+from services.bedrock_service import invoke_bedrock_model
+from services.get_image import get_image_details, detect_face_emotions
 
 def validate_input(body):
     """
