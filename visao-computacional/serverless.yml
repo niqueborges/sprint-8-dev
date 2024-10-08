@@ -4,36 +4,79 @@ frameworkVersion: '4'
 provider:
   name: aws
   runtime: python3.9
-  region: us-east-1
+  region: us-east-1  # Defina a região da AWS
+
+  # Permissões do CloudWatch
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: arn:aws:logs:*:*:*
+
+    - Effect: Allow
+      Action:
+        - "rekognition:DetectFaces"
+        - "rekognition:DetectLabels"
+      Resource:
+        - "arn:aws:rekognition:${self:provider.region}:${aws:accountId}:face/*"  # Substitua por variáveis dinâmicas para maior flexibilidade
+    - Effect: Allow
+      Action:
+        - "s3:GetObject"
+      Resource:
+        - "arn:aws:s3:::photogrupo3/*"  # Atualize para o nome exato do seu bucket
+    - Effect: Allow
+      Action:
+        - "bedrock:InvokeModel"
+        - "bedrock:ListModels"
+      Resource:
+        - "*"  # Use um ARN específico para Bedrock, se possível
 
 functions:
-  health:
-    handler: handler.health
+  visionHealthCheck:
+    handler: visao-computacional/handlers/lambda_handler.health
     events:
       - httpApi:
           path: /
           method: get
-  v1Description:
-    handler: handler.v1_description
+
+  visionGetDescriptionV1:
+    handler: visao-computacional/handlers/lambda_handler.v1_description
     events:
       - httpApi:
           path: /v1
           method: get
-  v2Description:
-    handler: handler.v2_description
+
+  visionGetDescriptionV2:
+    handler: visao-computacional/handlers/lambda_handler.v2_description
     events:
       - httpApi:
           path: /v2
           method: get
-  v1Vision:
-    handler: handler.v1_vision
+
+  visionDetectFaces:
+    handler: visao-computacional/handlers/vision_face.handler_face
     events:
-      - httpApi:
-          path: /v1/vision
+      - http:
+          path: /v1/vision/faces
           method: post
 
+  visionDetectPets:
+    handler: visao-computacional/handlers/lambda_pet.handler_pets
+    timeout: 30  # Ajuste o timeout conforme necessário
+    events:
+      - http:
+          path: /v2/vision/pets
+          method: post
 
 plugins:
-  - serverless-offline
   - serverless-python-requirements
+  - serverless-offline
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+  
+
 
